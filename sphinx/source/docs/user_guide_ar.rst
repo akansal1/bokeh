@@ -44,7 +44,7 @@ in that a high-level operation is requested and the abstract rendering
 system constructs the proper low-level function combinations.  
 
 
-There are currently three recipes
+There are currently three recipes:
 
 - **heatmap:** 
   Heatmap converts a plot of points into a plot of densities.
@@ -60,15 +60,22 @@ There are currently three recipes
   range of color composition of the visualization is essential to interpretation
   and there is only one category. The color scale can be perceptually corrected
   and include a large step from  zero items to many (to ensure visibility of outliers).
-  
-- **hdalpha:**
-  HDAlpha converts a plot of points into a plot of densities, just like heatmap.
-  However, heatmap is restricted to a single category, while hdalpha works with multiple categories of data.
-  The hdalpha recipe is useful for scatterplots with multiple categories or
-  geo-located event data where events are of different types. 
-  In the hdalpha recipe, categories are binned separately and a color ramp is made for each category.
-  Additionally, the composition between categories is also controlled to prevent over-saturation. 
-  
+
+  Example heatmap::
+
+    source = ServerDataSource(data_url="fn://gauss", owner_username="defaultuser")
+    plot = square('oneA', 'oneB', color='#FF00FF', source=source)
+    ar.heatmap(plot, spread=3, title="Heatmap Example")
+
+  Heatmap can be controlled with the following parameters:
+
+  - low: Color for the least dense bin (excluding 0)
+  - high: Color for the most dense bin
+  - spread: Spread values out after binning.  This is used for post-projection shapes. 
+  - transform: Modify counts before building the color ramp?
+    Valid options include 'cbrt' (default), 'log' and 'none'.
+  - Parameters understood by 'replot' in the functions interface may also be used
+    (thus 'title' in the example).
 
 - **contours:**
   The contours recipe converts a plot of points into ISO contours.
@@ -76,11 +83,37 @@ There are currently three recipes
   but instead of building color ramps, the contours recipe produces 
   a number of regions representing ranges of counts. 
 
+  Using the same source plot as in heatmap, contours is applied like this::
+
+    colors = ["#C6DBEF", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C", "#08306B"]
+    ar.contours(plot, palette=colors, title="ISO Contours")
+
+  The contours recipe uses the following parameters:
+
+  - Palette: List of colors for each contour, in the desired order.
+  - Parameters understood by 'replot' in the functions interface may also be used.
 
 
+- **hdalpha:**
+  HDAlpha converts a plot of points into a plot of densities, just like heatmap.
+  However, heatmap is restricted to a single category, while hdalpha works with multiple categories of data.
+  The hdalpha recipe is useful for scatterplots with multiple categories or
+  geo-located event data where events are of different types. 
+  In the hdalpha recipe, categories are binned separately and a color ramp is made for each category.
+  Additionally, the composition between categories is also controlled to prevent over-saturation. 
+
+  Example application of hdalpha::
+
+    plot = square('oneA', 'oneB', color='cats', source=source)
+    ar.hdalpha(plot, spread=5, title="Multiple categories")
+
+  The parameters for hdalpha are the same as for contours, except
+  that instead of determining the number of contours, palette determines
+  the number of categories.  If more categories are found than colors provided,
+  all 'extra' categories are combined into the last category. 
 
 Additional abstract rendering recipes usage can be found 
-in abstractrender.py (in examples/plotting/server).
+in census.py and abstractrender.py (in examples/plotting/server).
 
 
 Functions Interface
@@ -123,16 +156,17 @@ on the BokehJS client to do coloring.  The Contours shader produces sets of line
 instead of a new grid of bins.  Any chain that results in a grid of bins can be
 extended with additional shaders.
 
-Application of the functions interface can be found 
-in census.py (in examples/plotting/server).
+An application of the functions interface can be found 
+in abstractrender.py (in examples/plotting/server) where
+the heatmap recipe is recreated.
 
 
 
 Limitations
 --------------
 - At the current time, abstract rendering fully supports circle and square glyph types 
-in scatter plots and simple line plots.  More complex shapes and poly-lines cannot 
-used in the input plot at this time.
+  in scatter plots and simple line plots.  More complex shapes and poly-lines cannot 
+  used in the input plot at this time.
 
 - If a plot is constructed with multiple layers, only the first layer using a ServerDataSource
-  can have abstract rendering applied to it.
+  can use abstract rendering.
