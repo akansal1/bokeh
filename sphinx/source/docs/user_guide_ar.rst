@@ -65,11 +65,15 @@ There are currently three recipes:
 
     source = ServerDataSource(data_url="fn://gauss", owner_username="defaultuser")
     plot = square('oneA', 'oneB', color='#FF00FF', source=source)
-    ar.heatmap(plot, spread=3, title="Heatmap Example")
+    ar.heatmap(plot, spread=3, title="Census Tracts (Server Colors)")
+
+  .. image:: /_images/abstract_rendering/census_server.png
+      :align: center
 
   Heatmap can be controlled with the following parameters:
 
-  - low: Color for the least dense bin (excluding 0)
+  - client_color: Should coloring be done in the javascript client? 
+  - low: Color for the least dense bin (excluding 0). 
   - high: Color for the most dense bin
   - spread: Spread values out after binning.  This is used for post-projection shapes. 
   - transform: Modify counts before building the color ramp?
@@ -87,6 +91,9 @@ There are currently three recipes:
 
     colors = ["#C6DBEF", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C", "#08306B"]
     ar.contours(plot, palette=colors, title="ISO Contours")
+
+  .. image:: /_images/abstract_rendering/census_contours.png
+      :align: center
 
   The contours recipe uses the following parameters:
 
@@ -158,7 +165,9 @@ extended with additional shaders.
 
 An application of the functions interface can be found 
 in abstractrender.py (in examples/plotting/server) where
-the heatmap recipe is recreated.
+the heatmap recipe is recreated. The list of available functions
+and their relevant parameters is growing all the time. Please see
+the docstrings for details.
 
 
 
