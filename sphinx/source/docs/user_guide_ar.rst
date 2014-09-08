@@ -41,8 +41,10 @@ Recipies Interface
 Abstract rendering recipes provide direct access to common abstract
 rendering operations.  The recipes interface is declarative,
 in that a high-level operation is requested and the abstract rendering
-system constructs the proper low-level function combinations.  There 
-are currently three recipes
+system constructs the proper low-level function combinations.  
+
+
+There are currently three recipes
 
 - **heatmap:** 
   Heatmap converts a plot of points into a plot of densities.
@@ -75,8 +77,62 @@ are currently three recipes
   a number of regions representing ranges of counts. 
 
 
+
+
+Additional abstract rendering recipes usage can be found 
+in abstractrender.py (in examples/plotting/server).
+
+
 Functions Interface
 ---------------------
 
+The functional interface for abstract rendering provides a set of building blocks for
+creating and performing analysis on binned values.  In this interface, you have the 
+opportunity to specify the steps of any analysis and full control over the parametrization.
+In exchange, an understanding of the control flow and execution model in abstract rendering
+is required.
 
-[PLACEHOLDER for AR docs]
+Abstract rendering is configured via the 'replot' function.
+Replot takes a plot and an abstract rendering configuration as arguments 
+and produces a new plot.  It is the primitive which the recipes rely on
+(in fact, extra arguments passed to recipes will be sent to replot).
+The abstract rendering configuration breaks down into four function roles.
+The function roles available are:
+- selector: Determines which bins are associated with a glyph in the visualization
+- info: Determines which value goes into the bin for a given glyph
+- aggregator: Combines new values (from info) with the existing value of the bin
+- shader: Transforms a set of bins.  Shaders may be chained in many cases.
+
+In replot, the selector is determined either indirectly through the plot or via
+the 'points' flag.  If 'points' is set, then all geometry of the plot is interpreted
+as points that touch only one bin.  Otherwise, the shape-type of the source plot 
+will be used.
+
+The info function refers back to the data source of the original plot. The row
+related to the current shape is used as its argument. Since counts are common,
+the default info function is Const(1), which always returns the number 1.
+The info function is commonly used for categorization of the input glyphs.
+
+The aggregator builds bin values from info values and an existing bin.
+Count and CountCategories are the current aggregators.
+
+Shaders take sets of bins and transform them.  The most common target is a 
+new set of bins.  The output set of bins may be anything, though numbers and colors
+are the most common target.  Shader chains that end in grids of numbers rely
+on the BokehJS client to do coloring.  The Contours shader produces sets of lines
+instead of a new grid of bins.  Any chain that results in a grid of bins can be
+extended with additional shaders.
+
+Application of the functions interface can be found 
+in census.py (in examples/plotting/server).
+
+
+
+Limitations
+--------------
+- At the current time, abstract rendering fully supports circle and square glyph types 
+in scatter plots and simple line plots.  More complex shapes and poly-lines cannot 
+used in the input plot at this time.
+
+- If a plot is constructed with multiple layers, only the first layer using a ServerDataSource
+  can have abstract rendering applied to it.
