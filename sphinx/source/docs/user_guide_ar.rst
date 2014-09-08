@@ -63,8 +63,8 @@ There are currently three recipes:
 
   Example heatmap::
 
-    source = ServerDataSource(data_url="fn://gauss", owner_username="defaultuser")
-    plot = square('oneA', 'oneB', color='#FF00FF', source=source)
+    source = ServerDataSource(data_url="/defaultuser/CensusTracts.hdf5", owner_username="defaultuser")
+    plot = square( 'LON', 'LAT', source=source)
     ar.heatmap(plot, spread=3, title="Census Tracts (Server Colors)")
 
   .. image:: /_images/abstract_rendering/census_server.png
@@ -72,7 +72,6 @@ There are currently three recipes:
 
   Heatmap can be controlled with the following parameters:
 
-  - client_color: Should coloring be done in the javascript client? 
   - low: Color for the least dense bin (excluding 0). 
   - high: Color for the most dense bin
   - spread: Spread values out after binning.  This is used for post-projection shapes. 
@@ -163,11 +162,23 @@ on the BokehJS client to do coloring.  The Contours shader produces sets of line
 instead of a new grid of bins.  Any chain that results in a grid of bins can be
 extended with additional shaders.
 
-An application of the functions interface can be found 
-in abstractrender.py (in examples/plotting/server) where
-the heatmap recipe is recreated. The list of available functions
+Here is a recreation of the heatmap using the functions interface::
+
+    source = ServerDataSource(data_url="/defaultuser/CensusTracts.hdf5", owner_username="defaultuser")
+    plot = square( 'LON', 'LAT', source=source)
+    ar.replot(plot, 
+              agg=ar.Count(), 
+              shader=ar.Spread(factor=3) 
+                       + ar.Cuberoot()  # Approximates perceptual correction
+                       + ar.InterpolateColor(low=(255,200,200), high=(255,0,0)),
+              points=True,
+              reserve_val=0)
+
+
+The list of available functions
 and their relevant parameters is growing all the time. Please see
-the docstrings for details.
+the docstrings for details.  The above example is used
+in abstractrender.py (in examples/plotting/server).
 
 
 
